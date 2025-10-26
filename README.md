@@ -108,3 +108,9 @@ Logout seguro via botão no dashboard.
 Documentação Django
 Font Awesome
 W3Schools – HTML/CSS/JS
+
+
+##  Tela
+<p align="center">
+  <img src="images/screenshot.png" alt="Tela do app" width="400"/>
+</p>

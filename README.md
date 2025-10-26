@@ -127,8 +127,20 @@ W3Schools – HTML/CSS/JS
   <img src="https://i.imgur.com/mUItjDi.png" alt="cadastro" width="400"/>
 </p>
 
-## Exemplo de API Rest (PETS)
+## Exemplo de API Rest GET/POST(PETS)
 
 <p align="center">
   <img src="https://i.imgur.com/EY15pBD.png" alt="api pet" width="400"/>
+</p>
+
+## Exemplo de API Rest GET/POST(MORADORES)
+
+<p align="center">
+  <img src="https://i.imgur.com/2Id5nW8.png" alt="api pet" width="400"/>
+</p>
+
+## Acesso ao banco de dados e tabelas específicas direto pelo Python
+
+<p align="center">
+  <img src="https://i.imgur.com/T1oetoO.png" alt="api pet" width="400"/>
 </p>

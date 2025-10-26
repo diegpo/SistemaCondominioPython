@@ -112,5 +112,5 @@ W3Schools – HTML/CSS/JS
 
 ##  Tela
 <p align="center">
-  <img src="images/screenshot.png" alt="Tela do app" width="400"/>
+  <img src="/setup/static/assets/images/01.telalogin" alt="Tela do app" width="400"/>
 </p>

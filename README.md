@@ -109,8 +109,26 @@ Documentação Django
 Font Awesome
 W3Schools – HTML/CSS/JS
 
+## Tela de login
 
-##  Tela
 <p align="center">
   <img src="https://i.imgur.com/igu99pQ.png" alt="Tela de login" width="400"/>
+</p>
+
+## Alguns Menus
+
+<p align="center">
+  <img src="https://i.imgur.com/aBUhsFV.png" alt="menus" width="400"/>
+</p>
+
+## Cadastro Simples
+
+<p align="center">
+  <img src="https://i.imgur.com/mUItjDi.png" alt="cadastro" width="400"/>
+</p>
+
+## Exemplo de API Rest (PETS)
+
+<p align="center">
+  <img src="https://i.imgur.com/EY15pBD.png" alt="api pet" width="400"/>
 </p>

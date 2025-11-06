@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // -------------------- Logout --------------------
     function logout() {
-        window.location.href = "index.html";
+        window.location.href = "/sair/";
     }
     document.querySelector('.logout')?.addEventListener('click', logout);
 
@@ -68,6 +68,23 @@ document.addEventListener('DOMContentLoaded', () => {
         veiculos: API_BASE + 'veiculos/'
     };
 
+    // -------------------- Função para pegar o CSRF Token --------------------
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
     // -------------------- Funções auxiliares CRUD --------------------
     function createModal(title, fields, callback) {
         const oldModal = document.getElementById('crud-modal');
@@ -75,28 +92,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const modal = document.createElement('div');
         modal.id = 'crud-modal';
-        Object.assign(modal.style, {
-            position: 'fixed', top: '0', left: '0', width: '100%', height: '100%',
-            background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', zIndex: '1000'
-        });
+        modal.className = 'modal';
+        modal.style.display = 'flex';
 
         const modalContent = document.createElement('div');
-        Object.assign(modalContent.style, { background: '#fff', padding: '20px', borderRadius: '10px', minWidth: '300px' });
-        modalContent.innerHTML = `<h3>${title}</h3>`;
+        modalContent.className = 'modal-content';
+        modalContent.innerHTML = `<h2>${title}</h2>`;
 
         const form = document.createElement('form');
         fields.forEach(f => {
             const label = document.createElement('label');
             label.textContent = f.label;
-            label.style.display = 'block';
-            label.style.marginTop = '10px';
 
             const input = document.createElement('input');
             input.type = 'text';
             input.name = f.name;
             input.value = f.value || '';
-            input.style.width = '100%';
             input.required = true;
 
             label.appendChild(input);
@@ -106,7 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const submit = document.createElement('button');
         submit.type = 'submit';
         submit.textContent = 'Salvar';
-        submit.style.marginTop = '15px';
         form.appendChild(submit);
 
         form.addEventListener('submit', e => {
@@ -121,9 +131,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         modalContent.appendChild(form);
 
-        const closeBtn = document.createElement('button');
-        closeBtn.textContent = 'Cancelar';
-        closeBtn.style.marginTop = '10px';
+        const closeBtn = document.createElement('span');
+        closeBtn.className = 'close';
+        closeBtn.innerHTML = '&times;';
         closeBtn.addEventListener('click', () => modal.remove());
         modalContent.appendChild(closeBtn);
 
@@ -133,44 +143,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // -------------------- CRUD e renderização --------------------
     function renderTable(entity, data) {
-        let html = `<table border="1" style="width:100%; border-collapse: collapse;">
-                        <thead><tr>`;
+        let html = '';
+
+        html += `<div class="tabela-container">`;
+
         if (data.length > 0) {
+            html += `<table class="tabelas">
+                        <thead><tr>`;
             for (const key in data[0]) html += `<th>${key}</th>`;
             html += `<th>Ações</th></tr></thead><tbody>`;
             data.forEach(item => {
                 html += `<tr>`;
                 for (const key in item) html += `<td>${item[key]}</td>`;
                 html += `<td>
-                            <button class="edit-btn" data-id="${item.id}" data-entity="${entity}">Editar</button>
-                            <button class="delete-btn" data-id="${item.id}" data-entity="${entity}">Excluir</button>
+                            <button class="edit-btn action-btn" data-id="${item.id}" data-entity="${entity}">Editar</button>
+                            <button class="delete-btn action-btn" data-id="${item.id}" data-entity="${entity}">Excluir</button>
                          </td>`;
                 html += `</tr>`;
             });
             html += `</tbody></table>`;
-        } else html = '<p>Nenhum dado encontrado.</p>';
+        } else {
+            html += '<p>Nenhum dado encontrado.</p>';
+        }
 
-        html += `<button id="create-${entity}">Criar Novo ${entity}</button>`;
+        html += `</div>`;
+        html += `<button id="create-${entity}" class="action-btn" style="margin-top:15px;">Criar Novo ${entity}</button>`;
+
         contentArea.innerHTML = html;
 
-        // Editar
+        // Eventos
         document.querySelectorAll('.edit-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.dataset.id;
                 const item = data.find(d => d.id == id);
-                const fields = Object.keys(item).filter(k => k !== 'id').map(k => ({ name: k, label: k, value: item[k] }));
+                const fields = Object.keys(item)
+                    .filter(k => k !== 'id')
+                    .map(k => ({ name: k, label: k, value: item[k] }));
                 createModal(`Editar ${entity}`, fields, formData => updateItem(entity, id, formData));
             });
         });
 
-        // Excluir
         document.querySelectorAll('.delete-btn').forEach(btn => {
             btn.addEventListener('click', () => deleteItem(btn.dataset.entity, btn.dataset.id));
         });
 
-        // Criar novo
         document.getElementById(`create-${entity}`).addEventListener('click', () => {
-            const fields = data.length > 0 ? Object.keys(data[0]).filter(k => k !== 'id').map(k => ({ name: k, label: k })) : [{ name: 'nome', label: 'nome' }];
+            const fields = data.length > 0
+                ? Object.keys(data[0]).filter(k => k !== 'id').map(k => ({ name: k, label: k }))
+                : [{ name: 'nome', label: 'nome' }];
             createModal(`Criar ${entity}`, fields, formData => createItem(entity, formData));
         });
     }
@@ -186,25 +206,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // -------------------- CRUD com CSRF --------------------
     async function createItem(entity, data) {
         try {
-            const res = await fetch(endpoints[entity], { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-            if (res.ok) loadData(entity); else console.error(await res.json());
+            const res = await fetch(endpoints[entity], {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify(data)
+            });
+            if (res.ok) loadData(entity);
+            else console.error(await res.json());
         } catch (err) { console.error(err); }
     }
 
     async function updateItem(entity, id, data) {
         try {
-            const res = await fetch(endpoints[entity] + id + '/', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-            if (res.ok) loadData(entity); else console.error(await res.json());
+            const res = await fetch(endpoints[entity] + id + '/', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify(data)
+            });
+            if (res.ok) loadData(entity);
+            else console.error(await res.json());
         } catch (err) { console.error(err); }
     }
 
     async function deleteItem(entity, id) {
         if (!confirm(`Deseja excluir este ${entity}?`)) return;
         try {
-            const res = await fetch(endpoints[entity] + id + '/', { method: 'DELETE' });
-            if (res.ok) loadData(entity); else console.error(await res.json());
+            const res = await fetch(endpoints[entity] + id + '/', {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                }
+            });
+            if (res.ok) loadData(entity);
+            else console.error(await res.json());
         } catch (err) { console.error(err); }
     }
 

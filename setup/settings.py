@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from dotenv import load_dotenv
-import os
+import os, dj_database_url
 
 
 load_dotenv()
@@ -80,14 +80,11 @@ WSGI_APPLICATION = "setup.wsgi.application"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'sistemacondominio',
-        'USER': 'app_aplicativo',
-        'PASSWORD': 'acecombat',
-        'HOST': 'marvel-net',
-        'PORT': '5432',
-    }
+    'default': dj_database_url.config(
+        default='DATABASE_URL',
+        conn_max_age=600,
+        ssl_require=True
+    )
 }
 
 # Password validation
